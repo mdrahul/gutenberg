@@ -83,7 +83,7 @@ export default {
 		const messages = {
 			publish: __( 'Post published!' ),
 			'private': __( 'Post published privately!' ),
-			future: __( 'Post schduled!' ),
+			future: __( 'Post scheduled!' ),
 		};
 
 		// If we save a non published post, we don't show any notice

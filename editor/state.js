@@ -430,12 +430,12 @@ export function isSidebarOpened( state = ! isMobile, action ) {
 }
 
 /**
- * Reducer returning current network request state (whether a request to the WP
- * REST API is in progress, successful, or failed).
+ * Reducer returning current saving network request state (whether a request
+ * to the WP REST API is in progress, successful, or failed).
  *
  * @param  {string} state  Current state
  * @param  {Object} action Dispatched action
- * @return {string}        Updated state
+ * @return {Object}        Updated state
  */
 export function saving( state = {}, action ) {
 	switch ( action.type ) {
