@@ -139,15 +139,18 @@ export default {
 					type: 'TRASH_POST_SUCCESS',
 				} );
 			},
-			( response ) => {
+			( err ) => {
 				dispatch( {
 					...action,
 					type: 'TRASH_POST_FAILURE',
-					error: response.statusText,
+					error: get( err, 'responseJSON', {
+						code: 'unknown_error',
+						message: __( 'An unknown error occurred.' ),
+					} ),
 				} );
 				let message;
-				if ( response.responseJSON && response.responseJSON.message ) {
-					message = response.responseJSON.message;
+				if ( err.responseJSON && err.responseJSON.message ) {
+					message = err.responseJSON.message;
 				} else {
 					message = __( 'Trashing failed' );
 				}
@@ -157,10 +160,14 @@ export default {
 	},
 	TRASH_POST_SUCCESS( action ) {
 		const { postId, postType } = action;
-		window.location.href = getWPAdminURL( 'edit.php', {
-			trashed: 1,
-			post_type: postType,
-			ids: postId,
+
+		// Delay redirect to ensure store has been updated with the successful trash.
+		setTimeout( () => {
+			window.location.href = getWPAdminURL( 'edit.php', {
+				trashed: 1,
+				post_type: postType,
+				ids: postId,
+			} );
 		} );
 	},
 	MERGE_BLOCKS( action, store ) {
