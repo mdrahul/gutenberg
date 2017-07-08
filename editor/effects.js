@@ -132,12 +132,28 @@ export default {
 		const { dispatch, getState } = store;
 		const { postId } = action;
 		const Model = wp.api.getPostTypeModel( getCurrentPostType( getState() ) );
-		new Model( { id: postId } ).destroy().done( () => {
-			dispatch( {
-				...action,
-				type: 'TRASH_POST_SUCCESS',
-			} );
-		} );
+		new Model( { id: postId } ).destroy().then(
+			() => {
+				dispatch( {
+					...action,
+					type: 'TRASH_POST_SUCCESS',
+				} );
+			},
+			( response ) => {
+				dispatch( {
+					...action,
+					type: 'TRASH_POST_FAILURE',
+					error: response.statusText,
+				} );
+				let message;
+				if ( response.responseJSON && response.responseJSON.message ) {
+					message = response.responseJSON.message;
+				} else {
+					message = __( 'Trashing failed' );
+				}
+				dispatch( errorNotice( message ) );
+			}
+		);
 	},
 	TRASH_POST_SUCCESS( action ) {
 		const { postId, postType } = action;
