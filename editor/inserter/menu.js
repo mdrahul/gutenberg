@@ -33,9 +33,9 @@ class InserterMenu extends Component {
 		this.setSearchFocus = this.setSearchFocus.bind( this );
 		this.onKeyDown = this.onKeyDown.bind( this );
 		this.applySearchFilter = this.applySearchFilter.bind( this );
-		this.getBlockTypesForCurrentTab = this.getBlockTypesForCurrentTab.bind( this );
+		this.getBlocksForCurrentTab = this.getBlocksForCurrentTab.bind( this );
 		this.sortBlocks = this.sortBlocks.bind( this );
-		this.addRecent = this.addRecent.bind( this );
+		this.addRecentBlocks = this.addRecentBlocks.bind( this );
 		this.filterRecentForSearch = this.filterRecentForSearch.bind( this );
 	}
 
@@ -72,7 +72,7 @@ class InserterMenu extends Component {
 		return filter( blockTypes, matchesSearch );
 	}
 
-	getBlockTypesForCurrentTab() {
+	getBlocksForCurrentTab() {
 		switch ( this.state.tab ) {
 			case 'recent':
 				return this.props.recentlyUsedBlocks;
@@ -95,7 +95,7 @@ class InserterMenu extends Component {
 		return sortBy( blockTypes, getCategoryIndex );
 	}
 
-	addRecent( blocksByCategory ) {
+	addRecentBlocks( blocksByCategory ) {
 		blocksByCategory.recent = this.props.recentlyUsedBlocks;
 		return blocksByCategory;
 	}
@@ -114,7 +114,7 @@ class InserterMenu extends Component {
 			this.applySearchFilter,
 			this.sortBlocks,
 			this.groupByCategory,
-			this.addRecent,
+			this.addRecentBlocks,
 			this.filterRecentForSearch
 		)( blockTypes );
 	}
@@ -166,7 +166,7 @@ class InserterMenu extends Component {
 		const sortedByCategory = flow(
 			this.applySearchFilter,
 			this.sortBlocks,
-		)( this.getBlockTypesForCurrentTab() );
+		)( this.getBlocksForCurrentTab() );
 
 		// If the block list is empty return early.
 		if ( ! sortedByCategory.length ) {
@@ -181,7 +181,7 @@ class InserterMenu extends Component {
 		const sortedByCategory = flow(
 			this.applySearchFilter,
 			this.sortBlocks,
-		)( this.getBlockTypesForCurrentTab() );
+		)( this.getBlocksForCurrentTab() );
 
 		// If the block list is empty return early.
 		if ( ! sortedByCategory.length ) {
@@ -277,7 +277,7 @@ class InserterMenu extends Component {
 
 	render() {
 		const { position, instanceId } = this.props;
-		const visibleBlocksByCategory = this.getVisibleBlocksByCategory( this.getBlockTypesForCurrentTab() );
+		const visibleBlocksByCategory = this.getVisibleBlocksByCategory( this.getBlocksForCurrentTab() );
 
 		/* eslint-disable jsx-a11y/no-autofocus */
 		return (
@@ -297,7 +297,7 @@ class InserterMenu extends Component {
 					tabIndex="-1"
 				/>
 				<div role="menu" className="editor-inserter__content">
-					{ this.state.tab === 'recent' && (
+					{ this.state.tab === 'recent' && 
 						<div className="editor-inserter__recent">
 							<div
 								className="editor-inserter__category-blocks"
@@ -309,7 +309,6 @@ class InserterMenu extends Component {
 								{ visibleBlocksByCategory.recent.map( ( block ) => this.getBlockItem( block ) ) }
 							</div>
 						</div>
-						)
 					}
 					{ this.state.tab === 'blocks' &&
 						getCategories()
