@@ -72,7 +72,7 @@ export const editor = combineUndoableReducers( {
 				return false;
 
 			case 'UPDATE_BLOCK':
-			case 'INSERT_BLOCK':
+			case 'INSERT_BLOCKS':
 			case 'MOVE_BLOCKS_DOWN':
 			case 'MOVE_BLOCKS_UP':
 			case 'REPLACE_BLOCKS':
@@ -125,10 +125,10 @@ export const editor = combineUndoableReducers( {
 					},
 				};
 
-			case 'INSERT_BLOCK':
+			case 'INSERT_BLOCKS':
 				return {
 					...state,
-					[ action.block.uid ]: action.block,
+					...keyBy( action.blocks, 'uid' ),
 				};
 
 			case 'REPLACE_BLOCKS':
@@ -154,11 +154,11 @@ export const editor = combineUndoableReducers( {
 			case 'RESET_BLOCKS':
 				return action.blocks.map( ( { uid } ) => uid );
 
-			case 'INSERT_BLOCK': {
+			case 'INSERT_BLOCKS': {
 				const position = action.after ? state.indexOf( action.after ) + 1 : state.length;
 				return [
 					...state.slice( 0, position ),
-					action.block.uid,
+					...action.blocks.map( block => block.uid ),
 					...state.slice( position ),
 				];
 			}
@@ -235,13 +235,14 @@ export const editor = combineUndoableReducers( {
 					.filter( ( blockType ) => 'common' === blockType.category )
 					.slice( 0, maxRecent )
 					.map( ( blockType ) => blockType.name );
-			case 'INSERT_BLOCK':
+			case 'INSERT_BLOCKS':
 				// This is where we record the block usage so it can show up in
 				// the recent blocks.
-				return [
-					action.block.name,
-					...without( state, action.block.name ),
-				].slice( 0, maxRecent );
+				let newState = [ ...state ];
+				action.blocks.forEach( ( block ) => {
+					newState = [ block.name, ...without( newState, block.name ) ];
+				} );
+				return newState.slice( 0, maxRecent );
 		}
 		return state;
 	},
@@ -299,9 +300,9 @@ export function selectedBlock( state = {}, action ) {
 				: { uid: firstUid, typing: false, focus: {} };
 		}
 
-		case 'INSERT_BLOCK':
+		case 'INSERT_BLOCKS':
 			return {
-				uid: action.block.uid,
+				uid: action.blocks[ 0 ].uid,
 				typing: false,
 				focus: {},
 			};
@@ -363,7 +364,7 @@ export function multiSelectedBlocks( state = { start: null, end: null }, action 
 	switch ( action.type ) {
 		case 'CLEAR_SELECTED_BLOCK':
 		case 'TOGGLE_BLOCK_SELECTED':
-		case 'INSERT_BLOCK':
+		case 'INSERT_BLOCKS':
 			return {
 				start: null,
 				end: null,
