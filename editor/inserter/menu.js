@@ -277,7 +277,9 @@ class InserterMenu extends Component {
 
 	render() {
 		const { position, instanceId } = this.props;
-		const visibleBlocksByCategory = this.getVisibleBlocksByCategory( this.getBlocksForCurrentTab() );
+		const isSearching = this.state.filterValue;
+		// if we're searching, search across everything, otherwise just get the blocks visible in this tab
+		const visibleBlocksByCategory = isSearching ? this.getVisibleBlocksByCategory( getBlockTypes() ) : this.getVisibleBlocksByCategory( this.getBlocksForCurrentTab() );
 
 		/* eslint-disable jsx-a11y/no-autofocus */
 		return (
@@ -297,7 +299,7 @@ class InserterMenu extends Component {
 					tabIndex="-1"
 				/>
 				<div role="menu" className="editor-inserter__content">
-					{ this.state.tab === 'recent' &&
+					{ this.state.tab === 'recent' && ! isSearching &&
 						<div className="editor-inserter__recent">
 							<div
 								className="editor-inserter__category-blocks"
@@ -310,7 +312,7 @@ class InserterMenu extends Component {
 							</div>
 						</div>
 					}
-					{ this.state.tab === 'blocks' &&
+					{ this.state.tab === 'blocks' && ! isSearching &&
 						getCategories()
 							.map( ( category ) => category.slug !== 'embed' && !! visibleBlocksByCategory[ category.slug ] && (
 								<div key={ category.slug }>
@@ -332,7 +334,7 @@ class InserterMenu extends Component {
 								</div>
 							) )
 					}
-					{ this.state.tab === 'embeds' &&
+					{ this.state.tab === 'embeds' && ! isSearching &&
 						getCategories()
 							.map( ( category ) => category.slug === 'embed' && !! visibleBlocksByCategory[ category.slug ] && (
 								<div
@@ -346,27 +348,51 @@ class InserterMenu extends Component {
 								</div>
 							) )
 					}
+					{ isSearching &&
+						getCategories()
+							.map( ( category ) => !! visibleBlocksByCategory[ category.slug ] && (
+								<div key={ category.slug }>
+									<div
+										className="editor-inserter__separator"
+										id={ `editor-inserter__separator-${ category.slug }-${ instanceId }` }
+										aria-hidden="true"
+									>
+										{ category.title }
+									</div>
+									<div
+										className="editor-inserter__category-blocks"
+										role="menu"
+										tabIndex="0"
+										aria-labelledby={ `editor-inserter__separator-${ category.slug }-${ instanceId }` }
+									>
+										{ visibleBlocksByCategory[ category.slug ].map( ( block ) => this.getBlockItem( block ) ) }
+									</div>
+								</div>
+							) )
+					}
 				</div>
-				<div className="editor-inserter__tabs is-recent">
-					<button
-						className={ `editor-inserter__tab ${ this.state.tab === 'recent' ? 'is-active' : '' }` }
-						onClick={ () => this.switchTab( 'recent' ) }
-					>
-						{ __( 'Recent' ) }
-					</button>
-					<button
-						className={ `editor-inserter__tab ${ this.state.tab === 'blocks' ? 'is-active' : '' }` }
-						onClick={ () => this.switchTab( 'blocks' ) }
-					>
-						{ __( 'Blocks' ) }
-					</button>
-					<button
-						className={ `editor-inserter__tab ${ this.state.tab === 'embeds' ? 'is-active' : '' }` }
-						onClick={ () => this.switchTab( 'embeds' ) }
-					>
-						{ __( 'Embeds' ) }
-					</button>
-				</div>
+				{ ! isSearching &&
+					<div className="editor-inserter__tabs is-recent">
+						<button
+							className={ `editor-inserter__tab ${ this.state.tab === 'recent' ? 'is-active' : '' }` }
+							onClick={ () => this.switchTab( 'recent' ) }
+						>
+							{ __( 'Recent' ) }
+						</button>
+						<button
+							className={ `editor-inserter__tab ${ this.state.tab === 'blocks' ? 'is-active' : '' }` }
+							onClick={ () => this.switchTab( 'blocks' ) }
+						>
+							{ __( 'Blocks' ) }
+						</button>
+						<button
+							className={ `editor-inserter__tab ${ this.state.tab === 'embeds' ? 'is-active' : '' }` }
+							onClick={ () => this.switchTab( 'embeds' ) }
+						>
+							{ __( 'Embeds' ) }
+						</button>
+					</div>
+				}
 			</Popover>
 		);
 		/* eslint-enable jsx-a11y/no-autofocus */
