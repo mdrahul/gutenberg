@@ -297,7 +297,7 @@ class InserterMenu extends Component {
 					tabIndex="-1"
 				/>
 				<div role="menu" className="editor-inserter__content">
-					{ this.state.tab === 'recent' && 
+					{ this.state.tab === 'recent' &&
 						<div className="editor-inserter__recent">
 							<div
 								className="editor-inserter__category-blocks"
