@@ -11,13 +11,14 @@ import { __ } from 'i18n';
 import { Component } from 'element';
 import { Dashicon, Popover, withFocusReturn, withInstanceId } from 'components';
 import { TAB, ESCAPE, LEFT, UP, RIGHT, DOWN } from 'utils/keycodes';
-import { getCategories, getBlockTypes, getRecent, recordUsage } from 'blocks';
+import { getCategories, getBlockTypes } from 'blocks';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
 import { showInsertionPoint, hideInsertionPoint } from '../actions';
+import { getRecentlyUsedBlocks } from '../selectors';
 
 class InserterMenu extends Component {
 	constructor() {
@@ -59,7 +60,6 @@ class InserterMenu extends Component {
 	selectBlock( blockType ) {
 		return () => {
 			this.props.onSelect( blockType.name );
-			recordUsage( blockType );
 			this.setState( {
 				filterValue: '',
 				currentFocus: null,
@@ -75,7 +75,7 @@ class InserterMenu extends Component {
 	getBlockTypesForCurrentTab() {
 		switch ( this.state.tab ) {
 			case 'recent':
-				return getRecent();
+				return this.props.recentlyUsedBlocks;
 			case 'blocks':
 				return filter( getBlockTypes(), ( block ) => block.category !== 'embed' );
 			case 'embeds':
@@ -85,7 +85,7 @@ class InserterMenu extends Component {
 
 	sortBlocks( blockTypes ) {
 		if ( 'recent' === this.state.tab ) {
-			return blockTypes; // already sorted by getRecent() according to recent-ness
+			return blockTypes;
 		}
 
 		const getCategoryIndex = ( item ) => {
@@ -96,7 +96,7 @@ class InserterMenu extends Component {
 	}
 
 	addRecent( blocksByCategory ) {
-		blocksByCategory.recent = getRecent();
+		blocksByCategory.recent = this.props.recentlyUsedBlocks;
 		return blocksByCategory;
 	}
 
@@ -375,7 +375,11 @@ class InserterMenu extends Component {
 }
 
 const connectComponent = connect(
-	undefined,
+	( state ) => {
+		return {
+			recentlyUsedBlocks: getRecentlyUsedBlocks( state ),
+		};
+	},
 	{ showInsertionPoint, hideInsertionPoint }
 );
 
